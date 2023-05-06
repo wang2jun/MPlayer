@@ -26,10 +26,10 @@ export class PriorityQueue<T extends DanmakuData> {
 
     return this;
   }
- 
+
   // 直接将数据添加到缓冲队列的末尾
-  push(data:T) {
-    this.queue.push(data)
+  push(data: T) {
+    this.queue.push(data);
     return this;
   }
 
@@ -38,8 +38,8 @@ export class PriorityQueue<T extends DanmakuData> {
     return this.queue.shift();
   }
 
-  splice(index: number,number: number) {
-    this.queue.splice(index,number);
+  splice(index: number, number: number) {
+    this.queue.splice(index, number);
 
     return this;
   }
@@ -53,8 +53,8 @@ export class PriorityQueue<T extends DanmakuData> {
   }
 
   forEach(cb: (value: T, index: number) => void) {
-    for(let index = 0 ;index <this.queue.length;index++) {
-        cb(this.queue[index], index);
+    for (let index = 0; index < this.queue.length; index++) {
+      cb(this.queue[index], index);
     }
   }
 

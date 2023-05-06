@@ -39,8 +39,8 @@ export class DanmakuController {
     );
     this.instance = new Axios({
       baseURL: "",
-      timeout: this.options.timeout ?? null
-    })
+      timeout: this.options.timeout ?? null,
+    });
     this.init();
   }
 
@@ -50,10 +50,14 @@ export class DanmakuController {
     this.el = $("div.video-danmaku-container");
     this.el.style.backgroundColor = "#000";
     this.danmakuLoading = $("div");
-    addClass(this.danmakuLoading,["video-danmaku-loading-base","video-danmaku-loading","video-danmaku-shaking"])
-    this.danmakuLoading.innerHTML = "<span>弹幕数据加载中...</span>"
-    this.container.appendChild(this.el)
-    this.el.appendChild(this.danmakuLoading)
+    addClass(this.danmakuLoading, [
+      "video-danmaku-loading-base",
+      "video-danmaku-loading",
+      "video-danmaku-shaking",
+    ]);
+    this.danmakuLoading.innerHTML = "<span>弹幕数据加载中...</span>";
+    this.container.appendChild(this.el);
+    this.el.appendChild(this.danmakuLoading);
     this.danmaku = new Danmaku(this.el, this.player);
     this.initTemlate();
     this.initializeEvent();
@@ -71,25 +75,29 @@ export class DanmakuController {
     });
 
     socket.on("connect", () => {
-      this.setDanmakuSuccess()
+      this.setDanmakuSuccess();
       //* 当播放器时间更新是需要请求新的弹幕数据
-      this.player.video.addEventListener("timeupdate",(e) => {
-        socket.emit(EVENT.REQUEST_DANMAKU_DATA,{
-          time: this.player.video.currentTime
-        })
-      })
-      
-      socket.on(EVENT.SEND_DANMAKU_DATA,(data: any[]) => {
-        console.log(`接受到数据${JSON.stringify(data)},当前时间${this.player.video.currentTime}`);
-        
-        for(let item of data) {
-          this.danmaku.addData(item)
+      this.player.video.addEventListener("timeupdate", (e) => {
+        socket.emit(EVENT.REQUEST_DANMAKU_DATA, {
+          time: this.player.video.currentTime,
+        });
+      });
+
+      socket.on(EVENT.SEND_DANMAKU_DATA, (data: any[]) => {
+        console.log(
+          `接受到数据${JSON.stringify(data)},当前时间${
+            this.player.video.currentTime
+          }`
+        );
+
+        for (let item of data) {
+          this.danmaku.addData(item);
         }
-      })
+      });
     });
 
     socket.io.on("error", () => {
-      this.setDanmakuFail()
+      this.setDanmakuFail();
     });
 
     socket.connect();
@@ -97,37 +105,50 @@ export class DanmakuController {
 
   initHTTP() {
     //TODO  初始化http轮询连接
-    this.instance.get(this.options.api,{
-      query:{
-        time: 0
-      }
-    }).then((value) => {
-      this.setDanmakuSuccess();
+    this.instance
+      .get(this.options.api, {
+        query: {
+          time: 0,
+        },
+      })
+      .then(
+        (value) => {
+          this.setDanmakuSuccess();
 
-      this.player.video.addEventListener("timeupdate",this.onTimeupdate)
-    },(err) => {
-      this.setDanmakuFail();
-    })
+          this.player.video.addEventListener("timeupdate", this.onTimeupdate);
+        },
+        (err) => {
+          this.setDanmakuFail();
+        }
+      );
   }
 
   setDanmakuFail() {
     this.el.style.backgroundColor = "";
-      (this.danmakuLoading.childNodes[0] as HTMLElement).innerText = '弹幕加载失败';
-      removeClass(this.danmakuLoading,["video-danmaku-loading","video-danmaku-shaking"]);
+    (this.danmakuLoading.childNodes[0] as HTMLElement).innerText =
+      "弹幕加载失败";
+    removeClass(this.danmakuLoading, [
+      "video-danmaku-loading",
+      "video-danmaku-shaking",
+    ]);
 
-      setTimeout(() => {
-        addClass(this.danmakuLoading,["video-danmaku-loading-hide"])
-      }, 3000);
+    setTimeout(() => {
+      addClass(this.danmakuLoading, ["video-danmaku-loading-hide"]);
+    }, 3000);
   }
 
   setDanmakuSuccess() {
     this.el.style.backgroundColor = "";
-      (this.danmakuLoading.childNodes[0] as HTMLElement).innerText = '弹幕加载成功';
-      removeClass(this.danmakuLoading,["video-danmaku-loading","video-danmaku-shaking"]);
+    (this.danmakuLoading.childNodes[0] as HTMLElement).innerText =
+      "弹幕加载成功";
+    removeClass(this.danmakuLoading, [
+      "video-danmaku-loading",
+      "video-danmaku-shaking",
+    ]);
 
-      setTimeout(() => {
-        addClass(this.danmakuLoading,["video-danmaku-loading-hide"])
-      }, 3000);
+    setTimeout(() => {
+      addClass(this.danmakuLoading, ["video-danmaku-loading-hide"]);
+    }, 3000);
   }
 
   initTemlate() {
@@ -155,7 +176,6 @@ export class DanmakuController {
   }
 
   initializeEvent() {
-
     this.video.addEventListener("seeked", (e: Event) => {
       this.onSeeked(e);
     });
@@ -165,25 +185,25 @@ export class DanmakuController {
       this.danmaku.pause();
     });
 
-    this.video.addEventListener("waiting",() => {
+    this.video.addEventListener("waiting", () => {
       this.danmaku.pause();
-    })
+    });
 
-    this.video.addEventListener("abort",() => {
+    this.video.addEventListener("abort", () => {
       this.danmaku.flush();
-    })
+    });
 
     this.video.addEventListener("play", () => {
       this.danmaku.resume();
     });
 
-    this.video.addEventListener("canplay",() => {
-      this.danmaku.resume()
-    })
+    this.video.addEventListener("canplay", () => {
+      this.danmaku.resume();
+    });
 
-    this.video.addEventListener("timeupdate",() => {
-      this.danmaku.setPaused(false)
-    })
+    this.video.addEventListener("timeupdate", () => {
+      this.danmaku.setPaused(false);
+    });
 
     this.danmakuInput.on("sendData", function (data) {
       //TODO 此处为发送弹幕的逻辑
@@ -197,23 +217,25 @@ export class DanmakuController {
       this.danmaku.open();
     });
 
-    this.player.on(EVENT.RESIZE,() => {
+    this.player.on(EVENT.RESIZE, () => {
       this.setTrackNumber();
-    })
+    });
   }
 
   onTimeupdate(e: Event) {
     //TODO 时间更新
     //TODO 如果默认请求弹幕数据的方式为http请求，则需要进行轮询
-    this.instance.get(this.options.api,{
-      query:{
-        time: this.player.video.currentTime
-      },
-    }).then((value: DanmakuData[]) => {
-      for(let data of value) {
-        this.danmaku.addData(data);
-      }
-    })
+    this.instance
+      .get(this.options.api, {
+        query: {
+          time: this.player.video.currentTime,
+        },
+      })
+      .then((value: DanmakuData[]) => {
+        for (let data of value) {
+          this.danmaku.addData(data);
+        }
+      });
   }
 
   onSeeked(e: Event) {

@@ -32,6 +32,7 @@ class MediaPlayer {
   // 这个计算是因为在 DASH/HLS 等流媒体协议中，视频数据是以分片形式传输的，每个分片的时长可能不同，因此需要通过每个分片的时长来计算媒体源的总时长。
   initEvent() {
     let ctx = this;
+    // 该回调函数在媒体数据源打开时被调用，触发下载和解析 MP4 文件的操作
     this.mediaSource.addEventListener("sourceopen", (e) => {
       this.loadFile();
     });
@@ -43,6 +44,7 @@ class MediaPlayer {
     // moov box解析成功后触发该事件
     this.mp4boxfile.onReady = function (info: MoovBoxInfo) {
       ctx.mediaInfo = info;
+      // 根据视频是否分片设置媒体数据源的时长。
       if (info.isFragmented) {
         ctx.mediaSource.duration = info.fragment_duration / info.timescale;
       } else {
@@ -53,6 +55,7 @@ class MediaPlayer {
       ctx.initializeAllSourceBuffers();
     };
 
+    // 将解析出来的媒体片段推入相应的 SourceBuffer 中
     this.mp4boxfile.onSegment = function (
       id,
       user,
@@ -77,6 +80,7 @@ class MediaPlayer {
       var i, start, end;
       var seek_info;
       var video = this.player.video;
+      //   检查该时间是否与已缓存的视频片段时间段重叠;
       if (this.lastSeekTime !== video.currentTime) {
         for (i = 0; i < video.buffered.length; i++) {
           start = video.buffered.start(i);
@@ -86,6 +90,8 @@ class MediaPlayer {
           }
         }
         this.downloader.stop();
+        // 调用 mp4boxfile 实例的 seek() 方法，根据当前播放时间计算出需要下载的视频片段的起始位置和长度，
+        // 并调用 downloader 实例的 setChunkStart() 方法设置下载起始位置。
         seek_info = this.mp4boxfile.seek(video.currentTime, true);
         this.downloader.setChunkStart(seek_info.offset);
         this.downloader.resume();
@@ -118,6 +124,7 @@ class MediaPlayer {
     var codec = mp4track.codec;
     var mime = 'video/mp4; codecs="' + codec + '"';
     var sb: MP4SourceBuffer;
+    // 根据传入的 mp4track 参数获取轨道的 ID 和编解码器类型 codec，并使用这些信息构建媒体类型 mime
     if (MediaSource.isTypeSupported(mime)) {
       try {
         console.log(
@@ -178,9 +185,11 @@ class MediaPlayer {
     this.downloader.start();
   }
 
+  // 初始化媒体数据源的 SourceBuffer
   initializeAllSourceBuffers() {
     if (this.mediaInfo) {
       var info = this.mediaInfo;
+      // 遍历视频的所有轨道，为每个轨道添加一个对应的 SourceBuffer
       for (var i = 0; i < info.tracks.length; i++) {
         var track = info.tracks[i];
         this.addBuffer(track);
@@ -189,8 +198,9 @@ class MediaPlayer {
     }
   }
 
+  // 对所有的 SourceBuffer 进行初始化
   initializeSourceBuffers() {
-    var initSegs = this.mp4boxfile.initializeSegmentation();
+    var initSegs = this.mp4boxfile.initializeSegmentation(); //获取媒体片段的初始化数据
     for (var i = 0; i < initSegs.length; i++) {
       var sb = initSegs[i].user;
       if (i === 0) {
@@ -251,3 +261,19 @@ class MediaPlayer {
 }
 
 export default MediaPlayer;
+// 使用 MP4Box 来进行MP4文件的解析和处理，将MP4文件切分为多个小的视频片段
+// 使用了 MSE API来进行流媒体的播放
+// 播放器初始化时，创建了一个MediaSource对象，并将其绑定到video元素上，使得video元素的src属性指向MediaSource对象的URL
+// 播放器开始播放时，NiPlayer通过AJAX请求获取视频的初始化数据（moov box），
+// 然后根据moov box中的信息创建对应的SourceBuffer，这些SourceBuffer会被添加到MediaSource对象中的sourceBuffers列表中
+// 然后将视频播放器的currentTime设置为视频片段的开始时间
+// 在视频播放过程中，NiPlayer会不断请求新的视频片段，并将其添加到对应的SourceBuffer中，实现流式播放
+// 在用户进行拖动操作时，NiPlayer会检查拖动的位置是否已经被缓存，如果没有则停止当前的下载任务并请求新的视频片段
+// 同时，NiPlayer也会对视频进行缓存控制，根据buffered属性的值决定是否需要进行缓存释放以避免浏览器内存占用过大。
+
+// MediaPlayer：
+// 创建MediaSource对象并将其绑定到video元素上。
+// 实现addBuffer()方法，用于为每个视频轨道创建一个对应的SourceBuffer。
+// 实现start()方法，用于开始播放视频，其中包括加载视频初始化数据、创建SourceBuffer、请求第一个视频片段等逻辑。
+// SourceBuffer的updateend事件，当SourceBuffer中的数据更新完成时，触发该方法继续请求下一个视频片段。
+// 实现onSeeking()方法，用于监听视频拖动事件，当用户拖动视频进度条时，触发该方法停止当前下载任务并重新请求视频片段。

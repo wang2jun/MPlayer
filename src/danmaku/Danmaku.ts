@@ -23,7 +23,7 @@ export class Danmaku {
   private isPaused = true;
 
   // 弹幕占据屏幕的尺寸，默认占据一半屏幕
-  private showScale = 1/2
+  private showScale = 1 / 2;
   private tracks: Array<{
     track: Track;
     datas: DanmakuData[];
@@ -41,7 +41,7 @@ export class Danmaku {
     this.player = player;
     // 默认的轨道数目占据屏幕的一半
     this.trackNumber = this.container.clientHeight / 2 / this.trackHeight;
-    this.tracks = new Array(this.container.clientHeight / this.trackHeight)
+    this.tracks = new Array(this.container.clientHeight / this.trackHeight);
     this.init();
   }
   init() {
@@ -64,7 +64,7 @@ export class Danmaku {
 
   // 暂停所有的弹幕
   pause() {
-    this.setPaused(true)
+    this.setPaused(true);
     this.moovingQueue.forEach((data) => {
       this.pauseOneData(data);
     });
@@ -72,7 +72,7 @@ export class Danmaku {
 
   // 恢复弹幕的运动,恢复弹幕运动此处的逻辑有问题(已修复)
   resume() {
-    this.setPaused(false)
+    this.setPaused(false);
     this.timer = window.setTimeout(() => {
       this.render();
     }, this.renderInterval);
@@ -106,10 +106,10 @@ export class Danmaku {
   addData(data: any) {
     this.queue.push(this.parseData(data));
 
-    console.log(this.isPaused)
+    console.log(this.isPaused);
     // 如果检测到缓冲区弹幕为0,也就是定时器被关闭的话就重新开启定时器
-    if(this.timer === null) {
-      this.render()
+    if (this.timer === null) {
+      this.render();
     }
   }
 
@@ -136,7 +136,6 @@ export class Danmaku {
   }
 
   render() {
-    
     try {
       this.renderToDOM();
     } finally {
@@ -176,7 +175,6 @@ export class Danmaku {
       dom.style.opacity = this.opacity + "";
       dom.style.visibility = this.isHidden ? "hidden" : "";
       data.dom = dom;
-      
     }
     this.container.appendChild(data.dom);
     data.totalDistance = this.container.clientWidth + data.dom.clientWidth;
@@ -189,12 +187,10 @@ export class Danmaku {
     data.rollSpeed = parseFloat(
       (data.totalDistance / data.rollTime).toFixed(2)
     );
-    
     // useTracks描述的是该弹幕占用了多少个轨道
     data.useTracks = Math.ceil(data.dom.clientHeight / this.trackHeight);
     // 重点，此处数组y的作用是表明该弹幕占的轨道的id数组
     data.y = [];
-    
     this.addDataToTrack(data);
     if (data.y.length === 0) {
       if ([...this.container.childNodes].includes(data.dom)) {
@@ -209,7 +205,6 @@ export class Danmaku {
     data.dom.ontransitionstart = (e) => {
       data.startTime = Date.now();
     };
-
   }
 
   //将指定的data添加到弹幕轨道上
@@ -262,13 +257,13 @@ export class Danmaku {
   startAnimate(data: DanmakuData) {
     // moovingQueue中存储的都是在运动中的弹幕
     // 如果当前是暂停的化则该弹幕不应该开启动画
-    if(this.isPaused || this.player.video.paused) {
+    if (this.isPaused || this.player.video.paused) {
       this.queue.add(data);
-      this.removeDataFromTrack(data)
+      this.removeDataFromTrack(data);
       return;
     }
-    if(this.isHidden) {
-      data.dom.style.visibility = "hidden"
+    if (this.isHidden) {
+      data.dom.style.visibility = "hidden";
     }
     this.moovingQueue.push(data);
     data.dom.style.transition = `transform ${data.rollTime}s linear`;
@@ -282,9 +277,9 @@ export class Danmaku {
 
   //清空所有的弹幕，包括正在运动中的或者还在缓冲区未被释放的
   flush() {
-    console.log("flush")
+    console.log("flush");
 
-    window.clearTimeout(this.timer)
+    window.clearTimeout(this.timer);
     this.timer = null;
 
     this.moovingQueue.forEach((data) => {
@@ -337,27 +332,28 @@ export class Danmaku {
 
   setOpacity(opacity: number) {
     this.opacity = opacity;
-    this.moovingQueue.forEach(data => {
+    this.moovingQueue.forEach((data) => {
       data.dom.style.opacity = opacity + "";
-    })
+    });
   }
 
   setTrackNumber(num?: number) {
-    if(!num) {
-      this.trackNumber = this.container.clientHeight / this.trackHeight * this.showScale;
+    if (!num) {
+      this.trackNumber =
+        (this.container.clientHeight / this.trackHeight) * this.showScale;
       return;
-    } 
+    }
     this.showScale = num;
-    this.trackNumber = this.container.clientHeight / this.trackHeight * this.showScale;
+    this.trackNumber =
+      (this.container.clientHeight / this.trackHeight) * this.showScale;
   }
 
   setFontSize(scale: number) {
     this.fontSizeScale = scale;
-    this.moovingQueue.forEach(data => {
+    this.moovingQueue.forEach((data) => {
       data.dom.style.fontSize = data.fontSize * this.fontSizeScale + "px";
-    })
+    });
   }
-
 
   setPaused(val: boolean) {
     this.isPaused = val;
