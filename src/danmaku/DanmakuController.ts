@@ -30,7 +30,6 @@ export class DanmakuController {
     this.player = player;
     this.video = player.video;
     this.container = player.el;
-
     this.options = Object.assign(
       {
         type: "http",

@@ -6,8 +6,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-  <!-- <script src="https://cdn.jsdelivr.net/npm/niplayer@1.3.0/dist/player.umd.js"></script> -->
-  <script src="./dist/player.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/niplayer@1.3.0/dist/player.umd.js"></script>
+  <!-- <script src="./dist/player.umd.js"></script> -->
 
   <title>NiPlayer</title>
   <style>
@@ -69,12 +69,12 @@
         //         lang: "jp"
         //     }
         // ],
-        // danmaku: { //弹幕
-        //   open: true,
-        //   api: "https://bilibili-service.vercel.app/api/danmaku",
-        //   type: "http",
-        //   timeout: 5000
-        // },
+        danmaku: { //弹幕
+          open: true,
+          api: "https://bilibili-service.vercel.app/api/danmaku",
+          type: "http",
+          timeout: 5000
+        },
         // title: "一首《打上花火》竟治愈了无数破碎的心灵！"
       });
     }

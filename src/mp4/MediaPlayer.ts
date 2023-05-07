@@ -261,19 +261,3 @@ class MediaPlayer {
 }
 
 export default MediaPlayer;
-// 使用 MP4Box 来进行MP4文件的解析和处理，将MP4文件切分为多个小的视频片段
-// 使用了 MSE API来进行流媒体的播放
-// 播放器初始化时，创建了一个MediaSource对象，并将其绑定到video元素上，使得video元素的src属性指向MediaSource对象的URL
-// 播放器开始播放时，NiPlayer通过AJAX请求获取视频的初始化数据（moov box），
-// 然后根据moov box中的信息创建对应的SourceBuffer，这些SourceBuffer会被添加到MediaSource对象中的sourceBuffers列表中
-// 然后将视频播放器的currentTime设置为视频片段的开始时间
-// 在视频播放过程中，NiPlayer会不断请求新的视频片段，并将其添加到对应的SourceBuffer中，实现流式播放
-// 在用户进行拖动操作时，NiPlayer会检查拖动的位置是否已经被缓存，如果没有则停止当前的下载任务并请求新的视频片段
-// 同时，NiPlayer也会对视频进行缓存控制，根据buffered属性的值决定是否需要进行缓存释放以避免浏览器内存占用过大。
-
-// MediaPlayer：
-// 创建MediaSource对象并将其绑定到video元素上。
-// 实现addBuffer()方法，用于为每个视频轨道创建一个对应的SourceBuffer。
-// 实现start()方法，用于开始播放视频，其中包括加载视频初始化数据、创建SourceBuffer、请求第一个视频片段等逻辑。
-// SourceBuffer的updateend事件，当SourceBuffer中的数据更新完成时，触发该方法继续请求下一个视频片段。
-// 实现onSeeking()方法，用于监听视频拖动事件，当用户拖动视频进度条时，触发该方法停止当前下载任务并重新请求视频片段。

@@ -1,8 +1,8 @@
 import { DanmakuData } from "@/types/danmaku";
 
 export class PriorityQueue<T extends DanmakuData> {
-  readonly queue: T[];
-  private newestTime: number = 0;
+  queue: T[];
+  private newestTime: number = 0; //最新一条数据的时间戳
   private maxInterval: number = 5;
   constructor() {
     this.queue = [];
@@ -10,7 +10,7 @@ export class PriorityQueue<T extends DanmakuData> {
 
   // 清理过期数据
   private removeOutTimeData() {
-    this.queue.filter((value, index) => {
+    this.queue = this.queue.filter((value, index) => {
       return this.newestTime - value.timestamp <= this.maxInterval;
     });
   }

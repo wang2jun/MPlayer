@@ -90,6 +90,9 @@ export class Danmaku {
   }
 
   // 暂停单条弹幕的运动
+  // 计算出当前弹幕已经滚动的距离 currentRollDistance
+  // 然后将弹幕的 transition 样式清空，以停止弹幕的运动
+  // 将 transform 样式设置为 translateX(${-data.rollDistance}px)，弹幕就会停在当前的位置上。
   pauseOneData(data: DanmakuData) {
     let currentRollDistance =
       ((Date.now() - data.startTime) * data.rollSpeed) / 1000;
@@ -192,6 +195,7 @@ export class Danmaku {
     // 重点，此处数组y的作用是表明该弹幕占的轨道的id数组
     data.y = [];
     this.addDataToTrack(data);
+    // 如果弹幕的y属性为空，则说明当前没有轨道可用，此时将该弹幕数据加入到等待队列中。
     if (data.y.length === 0) {
       if ([...this.container.childNodes].includes(data.dom)) {
         this.container.removeChild(data.dom);
@@ -201,7 +205,8 @@ export class Danmaku {
       data.dom.style.top = data.y[0] * this.trackHeight + "px";
       this.startAnimate(data); //开启弹幕的动画
     }
-
+    // 给弹幕的CSS动画绑定了一个事件回调函数，当CSS动画开始时，将当前的时间戳保存到弹幕数据的startTime属性中，
+    // 后续可以使用这个时间戳计算弹幕的滚动距离。
     data.dom.ontransitionstart = (e) => {
       data.startTime = Date.now();
     };
@@ -216,6 +221,9 @@ export class Danmaku {
       if (datas.length === 0) {
         y.push(i);
       } else {
+        // 在添加弹幕之前，会遍历每个轨道，找到可以容纳该弹幕的空闲轨道。
+        // 如果该轨道已经有弹幕在滚动，则需要判断新的弹幕是否能够在此轨道中通过计算距离和速度来避免弹幕之间的重叠。
+        // 如果新弹幕无法容纳在当前轨道中，就需要继续找下一个轨道，直到找到足够的空闲轨道，然后将该弹幕添加到这些轨道中。
         let lastItem = datas[datas.length - 1];
         // diatance代表的就是在该轨道上弹幕lastItem已经行走的距离
         let distance =
@@ -256,7 +264,7 @@ export class Danmaku {
 
   startAnimate(data: DanmakuData) {
     // moovingQueue中存储的都是在运动中的弹幕
-    // 如果当前是暂停的化则该弹幕不应该开启动画
+    // 如果当前是暂停的话则该弹幕不应该开启动画
     if (this.isPaused || this.player.video.paused) {
       this.queue.add(data);
       this.removeDataFromTrack(data);
